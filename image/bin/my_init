@@ -1,5 +1,5 @@
 #!/usr/bin/python3 -u
-import os, os.path, sys, stat, signal, errno, argparse, time, json, re
+import os, os.path, sys, stat, signal, errno, argparse, time, json, re, locale
 
 KILL_PROCESS_TIMEOUT = int(os.environ.get('KILL_PROCESS_TIMEOUT', 5))
 KILL_ALL_PROCESSES_TIMEOUT = int(os.environ.get('KILL_ALL_PROCESSES_TIMEOUT', 5))
@@ -85,7 +85,10 @@ def export_envvars(to_dir = True):
 			continue
 		if to_dir:
 			with open("/etc/container_environment/" + name, "w") as f:
-				f.write(value)
+				if sys.stdout.encoding is None:
+					f.write(value.encode(locale.getpreferredencoding()))
+				else:
+					f.write(value)
 		shell_dump += "export " + sanitize_shenvname(name) + "=" + shquote(value) + "\n"
 	with open("/etc/container_environment.sh", "w") as f:
 		f.write(shell_dump)
